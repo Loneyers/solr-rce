@@ -58,8 +58,8 @@ if __name__ == '__main__':
         print("""
 url or urlfile is none
 
-ie:python3 solr-cve-2019-0193.py -f url.txt
-   pyrhon3 solr-cve-2019-0193.py -url http://www.google.com
+ie:python3 solr-rce.py -f url.txt
+   pyrhon3 solr-rce.py -url http://www.google.com
         """)
         sys.exit(1)
     if urlfile!=None:
